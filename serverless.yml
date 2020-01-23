@@ -1,0 +1,123 @@
+# Welcome to Serverless!
+
+service: platform-invite-code-service
+
+plugins:
+  - serverless-stage-manager
+  - serverless-domain-manager
+  - serverless-log-forwarding
+  - serverless-reqvalidator-plugin 
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'dev'}
+  profile: ${self:custom.awsProfile.${opt:stage, self:provider.stage}}
+  region: ${self:custom.awsRegion.${opt:stage, self:provider.stage}}
+  apiName: platform-invite-code-service
+  role: ${self:custom.awsIoTRole.${opt:stage, self:provider.stage}}
+  environment:
+    ENV: ${opt:stage, self:provider.stage} 
+    INVITECODE_TABLE: ${self:custom.InviteCodeTable}
+
+functions:
+  inviteCodeGenerate: 
+    handler: app/controllers/inviteCodeGenerate.handler
+    name: platform-invite-code-service-generate
+    memorySize: 128
+    description: generate invite code
+    events:
+      - http: 
+          path: /invitecode/
+          method: post
+          authorizer:
+              name: inviteCodeAuthuthorizer
+              arn:  ${self:custom.cognitoUserPoolArn.${opt:stage, self:provider.stage}}
+              identitySource: method.request.header.Authorization
+              identityValidationExpression: ${self:custom.cognitoAppClientId.${opt:stage, self:provider.stage}}
+              type:  request
+
+  claimInviteCode:
+    handler: app/controllers/claimInviteCode.handler
+    name: platform-invite-code-service-claimInviteCode
+    memorySize: 128
+    description: claim invite code.
+    events:
+      - http: 
+          path: /invitecode/
+          method: post
+          authorizer:
+              name: inviteCodeAuthuthorizer
+              arn:  ${self:custom.cognitoUserPoolArn.${opt:stage, self:provider.stage}}
+              identitySource: method.request.header.Authorization
+              identityValidationExpression: ${self:custom.cognitoAppClientId.${opt:stage, self:provider.stage}}
+              type:  request
+
+    custom:
+      stages:
+        - dev
+        - test
+        - stage
+        - prod
+
+      customDomain:
+        domainName: ${self:custom.awsCustomDomain.${opt:stage, self:provider.stage}}
+        stage: ${self:provider.stage}
+        basePath: devices
+        createRoute53Record: false
+        endpointType: REGIONAL  
+      
+      InviteCodeTable:
+        dev:
+        test:
+        prod:
+         
+      awsRegion:
+        dev: us-west-2
+        test: us-east-1
+        stage: us-east-1
+        prod: us-east-1
+
+      awsProfile:
+        dev: dev
+        test: test
+        stage: stage
+        prod: prod
+
+      awsIoTRole:
+        local: arn:aws:iam::975172936622:role/ZodiacLambdaIotRole
+        dev: arn:aws:iam::449633336138:role/ZodiacLambdaIotRole
+        staging: arn:aws:iam::155952777993:role/ZodiacLambdaIotRole
+        test: arn:aws:iam::707884542742:role/ZodiacLambdaIotRole
+        prod: arn:aws:iam::167683098627:role/ZodiacLambdaIotRole
+
+      awsCustomDomain:
+        dev: dev.zodiac-io.com
+        staging: staging.zodiac-io.com
+        test: test.zodiac-io.com
+        prod: prod.zodiac-io.com
+
+      cognitoUserPoolArn:
+        dev: 'arn:aws:cognito-idp:us-west-2:449633336138:userpool/us-west-2_grihDcgd7'
+        staging: 'arn:aws:cognito-idp:us-east-1:155952777993:userpool/us-east-1_aOpbfo2NA'
+        test: 'arn:aws:cognito-idp:us-east-1:707884542742:userpool/us-east-1_biCDKC7xn'
+        prod: 'arn:aws:cognito-idp:us-east-1:167683098627:userpool/us-east-1_DBiUTFVL1'
+
+      cognitoAppClientId:
+        dev: '4d97s3h65r2799ubcc8ib1gk62'
+        staging: '53c23477m5tifd50ra48uo9cba'
+        test: '5fgevv1kb9micfe1b94eiitk59'
+        prod: '2o40vroq5efq0nkq3bhfbpjgn8'
+
+    package:
+      individually: false
+      exclude:
+        - .eslintrc.yml
+        - .gitignore
+        - .git/**
+        - .vscode/**
+        - test/**
+        - coverage/**
+        - package-lock.json
+        - README.md 
+ 
