@@ -21,21 +21,21 @@ export class ClaimInviteCodeService {
  */
 
 public async addDeviceToLegacy(deviceId: string,deviceType: string,rubyUserId: any,rubyAuthToken: any,systemName: any) {
-    var body = {
+    let body = {
         api_key: config.apiKey,
         device_type: deviceType,
         name: systemName || '',
         user_id: rubyUserId,
         authentication_token: rubyAuthToken
     };
-    var options = {
+    let options = {
         uri: config.legacyRubyUrl + '/devices/' + deviceId + '/add.json',
         method: 'POST',
         form: body,
         headers: {
             'content-type': 'application/x-www-form-urlencoded'
         },
-        transform: function (body: string, response: any, resolveWithFullResponse: any) {
+        transform: function (body, response, resolveWithFullResponse) {
             return JSON.parse(body)
         }
     };
@@ -54,10 +54,10 @@ public async addDeviceToLegacy(deviceId: string,deviceType: string,rubyUserId: a
    * @return  resp
 */
 
-public async updateDUARecord(dynamoDb: AWS.DynamoDB.DocumentClient,deviceId: any,inviteCode: any) {
+public async updateDUARecord(dynamoDb: AWS.DynamoDB.DocumentClient,deviceId: string,inviteCode: string) {
     try {
         let params = {
-            TableName: process.env.DAA_TABLE,
+            TableName: process.env.DAA_TABLE!,
             Key: {
                 deviceId: deviceId
             },
@@ -88,14 +88,14 @@ public async updateDUARecord(dynamoDb: AWS.DynamoDB.DocumentClient,deviceId: any
    * @return null
 */    
 
-public async updateDynamodbInviteCodeTable(deviceId: any,rubyRes: any ,rubyUserId: any) {
+public async updateDynamodbInviteCodeTable(deviceId: string,rubyRes,rubyUserId: string) {
     try {
-      var claimedDt = new Date().toISOString();
-      var redeemed = true;
-      var claimedBy = rubyRes.owner_id || rubyUserId;
+       let claimedDt = new Date().toISOString();
+       let redeemed = true;
+       let claimedBy = rubyRes.owner_id || rubyUserId;
   
       let params = {
-          TableName: process.env.INVITECODE_TABLE,
+          TableName: process.env.INVITECODE_TABLE!,
           Key: {
               deviceId: deviceId
           },

@@ -1,0 +1,31 @@
+{
+  "name": "platform-invite-code-service",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc -w",
+    "lint": "tslint '*.ts'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-sdk": "0.0.42",
+    "@types/node": "^7.10.9",
+    "typescript": "^3.2.4"
+  },
+  "dependencies": {
+    "@types/http-status-codes": "^1.2.0",
+    "@types/request-promise": "^4.1.45",
+    "@types/shortid": "0.0.29",
+    "latest": "^0.2.0",
+    "serverless": "^1.62.0",
+    "serverless-aws-documentation": "^1.1.0",
+    "serverless-plugin-typescript": "^1.1.9",
+    "serverless-reqvalidator-plugin": "^1.0.3",
+    "serverless-stage-manager": "^1.0.5",
+    "uuid": "^3.1.0"
+  }
+}

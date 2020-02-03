@@ -1,10 +1,12 @@
+ 'use strict'
 
 import * as config from "../../config";
-import shortid from "shortid"; 
-import AWS from "aws-sdk";  
+import * as shortid from "shortid"; 
+import * as AWS from "aws-sdk";  
+import { DateTime } from "aws-sdk/clients/servicequotas";  
 
 
-module.exports.handler = (event: any, context: any , callback: any ) => {
+module.exports.handler = (event, context, callback) => {
   try {
 
       const requestBody = JSON.parse(event.body);
@@ -39,16 +41,17 @@ module.exports.handler = (event: any, context: any , callback: any ) => {
  * @param {datetime} expiryDate the expiryDate  
  *  
  */
- function createDynamoDbData(deviceId: any,inviteCode: any,userId: any,expiryDate: any) {
+ function createDynamoDbData(deviceId: string,inviteCode: string,userId: string,expiryDate) {
   return new Promise (function (resolve, reject) {
    
-        const params = recordParams(deviceId,inviteCode,userId,expiryDate);
-     
-        var dynamoDb = new AWS.DynamoDB.DocumentClient({
+        const params = recordParams(deviceId,inviteCode, userId,expiryDate);
+       
+        let dynamoDb = new AWS.DynamoDB.DocumentClient({
             apiVersion: '2012-08-10',
-            region: config.awsRegion
+            region: config.awsRegion 
         });
-        dynamoDb.put(params, function (error: any, data: any) {
+       
+        dynamoDb.put(params, function (error, data) {
             if (error) {
                 if (error.code === 'ConditionalCheckFailedException') {
                     console.log('record existed');
@@ -73,22 +76,22 @@ module.exports.handler = (event: any, context: any , callback: any ) => {
  * @param (DateTime) expiryDate expiryDate
  * @returns params
  */
-function recordParams(deviceId: any,inviteCode: any,userId: any,expiryDate: any) {
+function recordParams(deviceId: string, inviteCode: string, userId: string,expiryDate:DateTime) {
 
-    const record = {
+    let record = {
         deviceId: deviceId,
         invite_code: inviteCode,
         claimedBy: null,
-        reaterdBy: userId,
+        createdBy: userId,
         claimType: "Master",
         redeemed: false,
         createdAt: new Date().toISOString(),
         expiryDate: expiryDate,
         claimedAt: null            
     };
- 
-    return {
-        TableName: process.env.INVITECODE_TABLE,
+
+    return { 
+        TableName: process.env.INVITECODE_TABLE!,
         Item: record
     };
 }   
