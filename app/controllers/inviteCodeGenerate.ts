@@ -3,18 +3,18 @@
 import * as config from "../../config";
 import * as shortid from "shortid"; 
 import * as AWS from "aws-sdk";  
-import { DateTime } from "aws-sdk/clients/servicequotas";  
+import { DateTime } from "aws-sdk/clients/servicequotas"; 
 
 
 module.exports.handler = (event, context, callback) => {
   try {
 
       const requestBody = JSON.parse(event.body);
-      var deviceId = requestBody.deviceId;
-      var inviteCode = shortid.generate(); 
-      var expiryDate = null;
-      var userId = event.requestBody.userId;
-      var result = createDynamoDbData(deviceId,inviteCode,userId,expiryDate);
+      let deviceId = requestBody.deviceId;
+      let inviteCode = shortid.generate(); 
+      let expiryDate = null;
+      let userId = event.requestBody.userId;
+      let result = createDynamoDbData(deviceId,inviteCode,userId,expiryDate);
 
        return {
         statusCode: 200,
