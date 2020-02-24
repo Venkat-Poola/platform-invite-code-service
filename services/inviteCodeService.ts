@@ -16,12 +16,13 @@ export class InviteCodeService {
  * @param {datetime} expiryDate the expiryDate  
  *  
  */
-public async createDynamoDbData(deviceId: string,inviteCode: string,userId: string, expiryDate: DateTime) {
-    return new Promise (function (resolve, reject) { 
-         
+public async createDynamoDbData(deviceId: string, inviteCode: string, userId: string,expirtDate: DateTime) {
+    return new Promise (function (resolve, reject) {  
          const params = {
                 TableName: process.env.INVITECODE_TABLE!,
                 Item: {
+                    Id: deviceId,
+                    sortKey: 'ICM#',
                     deviceId: deviceId,
                     inviteCode: inviteCode,
                     claimedBy: null,
@@ -29,16 +30,13 @@ public async createDynamoDbData(deviceId: string,inviteCode: string,userId: stri
                     claimType: "Master",
                     redeemed: false,
                     createdAt: new Date().toISOString(),
-                    expiryDate: expiryDate,
+                    expiryDate: expirtDate,
                     claimedAt: null
                 }
-          } 
-         
-          let dynamoDb = new AWS.DynamoDB.DocumentClient({
-              apiVersion: '2012-08-10',
-              region: config.awsRegion 
-          });
-         
+          }  
+
+          const dynamoDb = new AWS.DynamoDB.DocumentClient();
+          
           dynamoDb.put(params, function (error, data) {
               if (error) {
                   if (error.code === 'ConditionalCheckFailedException') {
@@ -52,28 +50,33 @@ public async createDynamoDbData(deviceId: string,inviteCode: string,userId: stri
                   console.log('Successfully put invitecode record');
                   resolve (data);
               }
-            }); 
+            });  
    }); 
+   }
+   /**
+     * getInviteCodeRecord
+     *
+     * Queries DynamoDB users that are subscribed to the device data.
+     *
+     * @param deviceId device id / thing name
+     * @returns {Promise<*>}
+    */
+   async getInviteCodeRecord(deviceId) {
+    const dynamoDb = new AWS.DynamoDB.DocumentClient();   
+    let inviteCodeRecords = await dynamoDb.query({
+        TableName: process.env.INVITECODE_TABLE!,
+        KeyConditions: {
+            Id: {
+                ComparisonOperator: 'EQ',
+                AttributeValueList: [deviceId]
+            },
+            sortKey: {
+                ComparisonOperator: 'BEGINS_WITH',
+                AttributeValueList: ['ICM#']
+            }
+        }
+    }).promise();
+    console.log('Successfully retrieved invitecode record', deviceId); 
+    return inviteCodeRecords.Items;
+   }  
   } 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}

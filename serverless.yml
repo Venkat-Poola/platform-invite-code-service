@@ -3,64 +3,64 @@ service: platform-invite-code-service
 
 plugins:
   - serverless-stage-manager
- # - serverless-domain-manager
-#  - serverless-reqvalidator-plugin
-  - serverless-aws-documentation
-#  - serverless-pseudo-parameters
+  - serverless-domain-manager 
+  - serverless-aws-documentation 
   - serverless-plugin-typescript  
 
 provider:
   name: aws
-  runtime: nodejs13.3.0
+  runtime: nodejs12.x
   stage: ${opt:stage, 'dev'}
   profile: ${self:custom.awsProfile.${opt:stage, self:provider.stage}}
   region: ${self:custom.awsRegion.${opt:stage, self:provider.stage}}
   apiName: platform-invite-code-service
   role: ${self:custom.awsIoTRole.${opt:stage, self:provider.stage}}
   environment:
-    ENV: ${opt:stage, self:provider.stage}
-    #INVITECODE_TABLE: ${self:custom.InviteCodeTable}
-    INVITECODE_TABLE: "invite_code"
-    #DEVICE_TABLE: ${self:custom.DeviceTable}
-    DEVICE_TABLE: "platform-onica-push-notification-dev-DevicesTable-14VRHCV8USWR2" 
-     
-     # test: "platform-onica-push-notification-test-DevicesTable-14VRHCV8USWR2s"
-     # stage: "platform-onica-push-notification-stage-DevicesTable-14VRHCV8USWR2"
-    #  prod: "platform-onica-push-notification-DevicesTable-14VRHCV8USWR2"
+    ENV: ${opt:stage, self:provider.stage} 
+    INVITECODE_TABLE: ${self:custom.InviteCodeTable.${opt:stage, self:provider.stage}}
+    LEGACY_URL: ${self:custom.LegacyUrl.${opt:stage, self:provider.stage}}
+    DEVICE_TABLE: ${self:custom.DeviceTable.${opt:stage, self:provider.stage}}
+    APIKEY: ${self:custom.APIKey.${opt:stage, self:provider.stage}}
+    ACCESS_KEY_ID: ${self:custom.AcessKeyId.${opt:stage, self:provider.stage}}
+    ACCESS_KEY_SECRET: ${self:custom.AccessKeySecret.${opt:stage, self:provider.stage}}
 
 functions:
   inviteCodeGenerate: 
     handler: app/controllers/inviteCodeGenerate.handler
-    name: platform-invite-code-service-inviteCodeGenerate
+    name: platform-generate-invite-code
     memorySize: 128
     description: generate invite code
     events:
       - http: 
-          path: /invitecode/
+          path: /v1/generate
           method: post
-          authorizer:
-              name: inviteCodeAuthuthorizer
-              arn:  ${self:custom.cognitoUserPoolArn.${opt:stage, self:provider.stage}}
-              identitySource: method.request.header.Authorization
-              identityValidationExpression: ${self:custom.cognitoAppClientId.${opt:stage, self:provider.stage}}
-              type:  request
+          # authorizer:
+          #     name: iAqualinkAuthorizer
+          #     arn:  ${self:custom.cognitoUserPoolArn.${opt:stage, self:provider.stage}}
+          #     identitySource: method.request.header.Authorization
+          #     identityValidationExpression: ${self:custom.cognitoAppClientId.${opt:stage, self:provider.stage}}
+          #     type:  request
 
 
   claimInviteCode:
     handler: app/controllers/claimInviteCode.handler
-    name: platform-invite-code-service-claimInviteCode
+    name: platform-claim-invite-code
     memorySize: 128
     description: claim invite code.
+    tags:
+        env: ${opt:stage, self:provider.stage}
+        group: platform
+        sub-group: api
     events:
       - http: 
-          path: /invitecode/
+          path: /v1/claim
           method: post
-          authorizer:
-              name: inviteCodeAuthuthorizer
-              arn:  ${self:custom.cognitoUserPoolArn.${opt:stage, self:provider.stage}}
-              identitySource: method.request.header.Authorization
-              identityValidationExpression: ${self:custom.cognitoAppClientId.${opt:stage, self:provider.stage}}
-              type:  request
+          # authorizer:
+          #     name: iAqualinkAuthorizer
+          #     arn:  ${self:custom.cognitoUserPoolArn.${opt:stage, self:provider.stage}}
+          #     identitySource: method.request.header.Authorization
+          #     identityValidationExpression: ${self:custom.cognitoAppClientId.${opt:stage, self:provider.stage}}
+          #     type:  request
 
 custom:
   stages:
@@ -69,70 +69,90 @@ custom:
     - stage
     - prod
 
-  customDomain:
-    domainName: ${self:custom.awsCustomDomain.${opt:stage, self:provider.stage}}
-    stage: ${self:provider.stage}
-    basePath: devices
-    createRoute53Record: false
-    endpointType: REGIONAL  
-      
   InviteCodeTable:
-    "dev": "invite_code"
-    "test": "invite_code"
-    "prod": "invite_code"
+    dev: invite_code
+    test: invite_code
+    staging: invite_code
+    prod: invite_code
+   
+  LegacyUrl:
+    dev: https://r-api.zodiac-dev.com
+    test: 
+    prod:
+
+  APIKey:
+    dev: C4RRKQ4FR73CE4HQ
+    test:
+    prod: 
+
+  AcessKeyId:
+     dev: AKIA6GDGWEOXKBL2R75W
+     test: AKIA6GDGWEOXKBL2R75W
+     staging: AKIA6GDGWEOXKBL2R75W
+     prod:
+  
+  AccessKeySecret:
+     dev: 5IMMKk70ueanVSkxJZMtnU6RMx4exOEh88qhtEpO
+     test: 5IMMKk70ueanVSkxJZMtnU6RMx4exOEh88qhtEpO
+     staging: 5IMMKk70ueanVSkxJZMtnU6RMx4exOEh88qhtEpO
+     prod:
 
   DeviceTable:
-    dev: "platform-onica-push-notification-dev-DevicesTable-14VRHCV8USWR2"
-    test: 'platform-onica-push-notification-test-DevicesTable-14VRHCV8USWR2s'
-    stage: 'platform-onica-push-notification-stage-DevicesTable-14VRHCV8USWR2'
-    prod: 'platform-onica-push-notification-DevicesTable-14VRHCV8USWR2'
+    dev: platform-onica-push-notification-dev-DevicesTable-14VRHCV8USWR2
+    test: platform-onica-push-notification-test-DevicesTable-14VRHCV8USWR2s
+    staging: platform-onica-push-notification-stage-DevicesTable-14VRHCV8USWR2
+    prod: platform-onica-push-notification-DevicesTable-14VRHCV8USWR2
 
   awsRegion:
     dev: us-west-2
     test: us-east-1
-    stage: us-east-1
+    staging: us-east-1
     prod: us-east-1
 
   awsProfile:
     dev:  dev
     test: test
-    stage: stage
+    staging: stage
     prod: prod
 
   awsIoTRole:
-    local: arn:aws:iam::975172936622:role/ZodiacLambdaIotRole
     dev: arn:aws:iam::449633336138:role/ZodiacLambdaIotRole
-    stage: arn:aws:iam::155952777993:role/ZodiacLambdaIotRole
+    staging: arn:aws:iam::155952777993:role/ZodiacLambdaIotRole
     test: arn:aws:iam::707884542742:role/ZodiacLambdaIotRole
     prod: arn:aws:iam::167683098627:role/ZodiacLambdaIotRole
 
   awsCustomDomain:
     dev: dev.zodiac-io.com
-    stage: staging.zodiac-io.com
+    staging: staging.zodiac-io.com
     test: test.zodiac-io.com
     prod: prod.zodiac-io.com
+  
+  cognitoAppClientId:
+    dev: 4d97s3h65r2799ubcc8ib1gk62
+    staging: 53c23477m5tifd50ra48uo9cba
+    test: 5fgevv1kb9micfe1b94eiitk59
+    prod: 2o40vroq5efq0nkq3bhfbpjgn8
 
   cognitoUserPoolArn:
-    dev: 'arn:aws:cognito-idp:us-west-2:449633336138:userpool/us-west-2_grihDcgd7'
-    stage: 'arn:aws:cognito-idp:us-east-1:155952777993:userpool/us-east-1_aOpbfo2NA'
-    test: 'arn:aws:cognito-idp:us-east-1:707884542742:userpool/us-east-1_biCDKC7xn'
-    prod: 'arn:aws:cognito-idp:us-east-1:167683098627:userpool/us-east-1_DBiUTFVL1'
-
-  cognitoAppClientId:
-    dev: '4d97s3h65r2799ubcc8ib1gk62'
-    stage: '53c23477m5tifd50ra48uo9cba'
-    test: '5fgevv1kb9micfe1b94eiitk59'
-    prod: '2o40vroq5efq0nkq3bhfbpjgn8'   
+    dev: arn:aws:cognito-idp:us-west-2:449633336138:userpool/us-west-2_grihDcgd7
+    staging: arn:aws:cognito-idp:us-east-1:155952777993:userpool/us-east-1_aOpbfo2NA
+    test: arn:aws:cognito-idp:us-east-1:707884542742:userpool/us-east-1_biCDKC7xn
+    prod: rn:aws:cognito-idp:us-east-1:167683098627:userpool/us-east-1_DBiUTFVL1
+  
+  customDomain:
+    domainName: ${self:custom.awsCustomDomain.${opt:stage, self:provider.stage}}
+    stage: ${self:provider.stage}
+    basePath: invitecodes
+    createRoute53Record: false
+    endpointType: REGIONAL
 
 package:
-    individually: false
-    exclude:
-      - .eslintrc.yml
-      - .gitignore
-      - .git/**
-      - .vscode/**
-      - test/**
-      - coverage/**
-      - package-lock.json
-      - README.md 
- 
+  exclude:
+    - .eslintrc.yml
+    - .gitignore
+    - .git/**
+    - .vscode/**
+    - test/**
+    - coverage/**
+    - package-lock.json
+    - README.md

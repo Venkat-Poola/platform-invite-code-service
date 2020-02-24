@@ -18,14 +18,23 @@
   },
   "dependencies": {
     "@types/http-status-codes": "^1.2.0",
+    "@types/qrcode-generator": "^1.0.6",
+    "@types/request": "^2.48.4",
     "@types/request-promise": "^4.1.45",
     "@types/shortid": "0.0.29",
+    "@types/uuid": "^3.4.7",
+    "express": "^4.17.1",
     "latest": "^0.2.0",
+    "qr-image": "^3.2.0",
+    "qrcode": "^1.4.4",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5",
     "serverless": "^1.62.0",
     "serverless-aws-documentation": "^1.1.0",
+    "serverless-domain-manager": "^3.3.1",
     "serverless-plugin-typescript": "^1.1.9",
     "serverless-reqvalidator-plugin": "^1.0.3",
     "serverless-stage-manager": "^1.0.5",
-    "uuid": "^3.1.0"
+    "stream": "0.0.2"
   }
 }

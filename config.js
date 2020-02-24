@@ -19,7 +19,8 @@ const dev = {
     awsUserPoolId: process.env.userPoolId || 'us-west-2_grihDcgd7',
     awsIdentityPoolId: process.env.identityPoolId || 'us-west-2:d778d28a-d6d8-4ab0-aa2a-5c3dfc6d3820',
     awsUserPoolClientId: 'app_client_id',
-    apiKey: process.env.apiKey || 'C4RRKQ4FR73CE4HQ'
+    apiKey: process.env.apiKey || 'C4RRKQ4FR73CE4HQ',
+    apiSecret: process.env.apiSecret || 'gpvtbWhHEqzkpHfVO1so0w'
 };
 
 var config = {
