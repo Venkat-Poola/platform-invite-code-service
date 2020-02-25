@@ -2,16 +2,8 @@
  
 import * as shortid from "shortid";  
 import {InviteCodeService} from "../../services/InviteCodeService";
-import { DateTime } from "aws-sdk/clients/servicequotas"; 
-import { Item } from "aws-sdk/clients/simpledb";
-import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { PromiseResult } from "aws-sdk/lib/request";
-import * as qrcode from 'qrcode'; 
-import * as fs from 'fs';
-import * as qrimage from 'qr-image';
-import * as app from 'express';
-import * as stream from 'stream';
-import * as http from 'http';
+import { DateTime } from "aws-sdk/clients/servicequotas";  
+import * as qrcode from 'qrcode';  
 import { Transform } from 'stream';
 import * as AWS from "aws-sdk"; 
  
@@ -22,6 +14,7 @@ module.exports.handler = (event, context, callback) => {
       console.log("request body "+requestBody)
       let deviceId: string  = requestBody.deviceId;
       console.log("deviceid " +deviceId);
+      let inviteCodeFind: string;
       
       const expiryDate: DateTime = null!;
       let userId: string  = requestBody.userId;
@@ -29,11 +22,6 @@ module.exports.handler = (event, context, callback) => {
       const inviteCodeService = new InviteCodeService(); 
      
      let inviteCode: string  = shortid.generate();  
-      
-     const qrOption = { 
-        margin : 15,
-        width : 475
-      };  
 
       let resp
       let responseBody;
@@ -52,7 +40,12 @@ module.exports.handler = (event, context, callback) => {
 
           } 
         else
-          {
+          {  
+            
+             inviteCodeFind =  inviteCodeService.getInviteCodeRecord(deviceId);   
+  
+            console.log("inviteCodeFind "+ inviteCodeFind);
+             
             let res = inviteCodeService.createDynamoDbData(deviceId,inviteCode,userId,expiryDate);
                 
              const s3 = new AWS.S3({ apiVersion: '2006-03-01', region: 'us-west-2', accessKeyId: process.env.ACCESS_KEY_ID!,
@@ -75,7 +68,7 @@ module.exports.handler = (event, context, callback) => {
 
               s3.upload(
                   {
-                    Bucket: 'invitecode',
+                    Bucket: process.env.S3_BUCKET_NAME!,
                     Key: `QR_${inviteCode}.png`,
                     Body: inoutStream,
                     ACL: 'public-read',
@@ -95,7 +88,7 @@ module.exports.handler = (event, context, callback) => {
                     
                  let qrUrl = "QR_"+ inviteCode + ".png";   
                  
-                 let inviteCodeUrl = "https://invitecode.s3-us-west-2.amazonaws.com/" + qrUrl;
+                 let inviteCodeUrl = process.env.S3_BUCKET_URL! + qrUrl;
            
          responseBody = {"qrcode": inviteCodeUrl, 
                 "inviteCode":inviteCode

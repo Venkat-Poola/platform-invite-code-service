@@ -23,6 +23,8 @@ provider:
     APIKEY: ${self:custom.APIKey.${opt:stage, self:provider.stage}}
     ACCESS_KEY_ID: ${self:custom.AcessKeyId.${opt:stage, self:provider.stage}}
     ACCESS_KEY_SECRET: ${self:custom.AccessKeySecret.${opt:stage, self:provider.stage}}
+    S3_BUCKET_NAME: ${self:custom.S3BucketName.${opt:stage, self:provider.stage}}
+    S3_BUCKET_URL: ${self:custom.S3BucketUrl.${opt:stage, self:provider.stage}}
 
 functions:
   inviteCodeGenerate: 
@@ -114,6 +116,18 @@ custom:
     test: test
     staging: stage
     prod: prod
+
+  S3BucketName:
+    dev: invitecode.zodiac-dev
+    test: invitecode.zodiac-test
+    staging: invitecode.zodiac-staging
+    prod: invitecode.zodiac
+
+  S3BucketUrl:
+    dev: https://s3-us-west-2.amazonaws.com/invitecode.zodiac-dev/
+    test: https://s3-us-west-2.amazonaws.com/invitecode.zodiac-test/
+    staging: https://s3-us-west-2.amazonaws.com/invitecode.zodiac-staging/
+    prod: https://s3-us-west-2.amazonaws.com/invitecode.zodiac/
 
   awsIoTRole:
     dev: arn:aws:iam::449633336138:role/ZodiacLambdaIotRole
