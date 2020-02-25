@@ -116,7 +116,7 @@ custom:
   awsProfile:
     dev:  dev
     test: test
-    staging: stage
+    staging: staging
     prod: prod
 
   S3BucketName:
