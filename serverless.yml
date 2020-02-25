@@ -79,13 +79,15 @@ custom:
    
   LegacyUrl:
     dev: https://r-api.zodiac-dev.com
-    test: 
-    prod:
+    test: https://r-api.zodiac-test.com
+    staging: https://r-api.zodiac-staging.com
+    prod: https://r-api.iaqualink.net
 
   APIKey:
     dev: C4RRKQ4FR73CE4HQ
-    test:
-    prod: 
+    test: C4RRKQ4FR73CE4HQ
+    staging: C4RRKQ4FR73CE4HQ
+    prod: C4RRKQ4FR73CE4HQ
 
   AcessKeyId:
      dev: AKIA6GDGWEOXKBL2R75W
